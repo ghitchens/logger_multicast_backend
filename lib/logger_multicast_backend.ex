@@ -88,6 +88,7 @@ defmodule LoggerMulticastBackend do
       :ok ->
         {:ok, state}
       _ ->
+        :gen_udp.close socket
         {:ok, %{state | socket: nil}}
     end
   end
