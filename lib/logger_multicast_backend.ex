@@ -84,8 +84,12 @@ defmodule LoggerMulticastBackend do
   end
       
   defp log_event(level, msg, ts, md, %{socket: socket, target: {addr, port}} = state) do
-    :ok = :gen_udp.send socket, addr, port, format_event(level, msg, ts, md, state)
-    {:ok, state}
+    case :gen_udp.send(socket, addr, port, format_event(level, msg, ts, md, state)) do
+      :ok ->
+        {:ok, state}
+      _ ->
+        {:ok, %{state | socket: nil}}
+    end
   end
 
   defp format_event(level, msg, ts, md, %{format: format, metadata: metadata}) do
