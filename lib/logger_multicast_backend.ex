@@ -52,7 +52,7 @@ defmodule LoggerMulticastBackend do
     target = Keyword.get(opts, :target, @default_target)
     state = %{
       target: target,
-      socket: open_logging_socket,
+      socket: nil,
       level: Keyword.get(opts, :level, @default_level),
       format: (Keyword.get(opts, :format, @default_format) |> Logger.Formatter.compile),
       metadata: Keyword.get(opts, :metadata, [])
@@ -74,11 +74,15 @@ defmodule LoggerMulticastBackend do
 
   # private helpers
 
-  defp open_logging_socket do
-    {:ok, socket} = :gen_udp.open 0, @socket_opts
-    socket
+  defp log_event(level, msg, ts, md, %{socket: nil} = state) do
+    case :gen_udp.open(0, @socket_opts) do
+      {:ok, socket} -> 
+        log_event level, msg, ts, md, %{state | socket: socket}
+      _ -> 
+        {:ok, state}
+    end
   end
-
+      
   defp log_event(level, msg, ts, md, %{socket: socket, target: {addr, port}} = state) do
     :ok = :gen_udp.send socket, addr, port, format_event(level, msg, ts, md, state)
     {:ok, state}
