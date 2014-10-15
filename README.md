@@ -11,7 +11,7 @@ In your logger config, simply do something like this:
 
 ```elixir
 config :logger,
-backends: [ :console, LoggerMulticastBackend ]
+backends: [ :console, LoggerMulticastBackend ],
 level: :debug,
 format: "$time $metadata[$level] $message\n"
 ```
