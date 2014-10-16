@@ -32,7 +32,7 @@ defmodule LoggerMulticastSender do
       {:ok, socket} -> 
         {:noreply, %{ state | socket: socket }, @packet_pacer_time}
       _ -> 
-        {:noreply, state, @ocket_retry_time}
+        {:noreply, state, @socket_retry_time}
     end
   end
 
