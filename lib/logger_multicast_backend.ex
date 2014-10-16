@@ -35,24 +35,22 @@ defmodule LoggerMulticastBackend do
 
   @type level     :: Logger.level
   @type format    :: String.t
-  @type metadata  :: [atom]
-  
-  @socket_opts [:binary, {:broadcast, true}, {:active, false}, {:reuseaddr, true} ]
+  @type metadata  :: [atom]  
 
+  @default_target {{224,0,0,224}, 9999}
   @default_format "$time $metadata[$level] $message\n"
   @default_level  :debug
-  @default_target {{224,0,0,224}, 9999}
   
   @doc """
   initialize the state of this logger to the environment specified
   in the logger configuration for this backend
   """
   def init({__MODULE__, opts}) do
-    Logger.debug "starting multicast backend with #{inspect opts}"
     target = Keyword.get(opts, :target, @default_target)
+    Logger.debug "starting multicast backend on target #{inspect target}"
+    {:ok, sender} = GenServer.start_link(LoggerMulticastSender, target)
     state = %{
-      target: target,
-      socket: nil,
+      sender: sender,
       level: Keyword.get(opts, :level, @default_level),
       format: (Keyword.get(opts, :format, @default_format) |> Logger.Formatter.compile),
       metadata: Keyword.get(opts, :metadata, [])
@@ -60,37 +58,15 @@ defmodule LoggerMulticastBackend do
     {:ok, state}
   end
 
-  def init(__MODULE__) do
-    init({__MODULE__, []})
-  end
+  def init(__MODULE__), do: init({__MODULE__, []})
 
+  @doc "Add the formatted log entry to the log output queue if it meets our logging criteria"
   def handle_event({level, _gl, {Logger, message, timestamp, metadata}}, %{level: min_level} = state) do
     if is_nil(min_level) or Logger.compare_levels(level, min_level) != :lt do
-      log_event(level, message, timestamp, metadata, state)
-    else
-      {:ok, state}
+      entry = format_event(level, message, timestamp, metadata, state)
+      :ok = GenServer.cast(state.sender, {:add_entry, entry})
     end
-  end
-
-  # private helpers
-
-  defp log_event(level, msg, ts, md, %{socket: nil} = state) do
-    case :gen_udp.open(0, @socket_opts) do
-      {:ok, socket} -> 
-        log_event level, msg, ts, md, %{state | socket: socket}
-      _ -> 
-        {:ok, state}
-    end
-  end
-      
-  defp log_event(level, msg, ts, md, %{socket: socket, target: {addr, port}} = state) do
-    case :gen_udp.send(socket, addr, port, format_event(level, msg, ts, md, state)) do
-      :ok ->
-        {:ok, state}
-      _ ->
-        :gen_udp.close socket
-        {:ok, %{state | socket: nil}}
-    end
+    {:ok, state}
   end
 
   defp format_event(level, msg, ts, md, %{format: format, metadata: metadata}) do
@@ -98,3 +74,4 @@ defmodule LoggerMulticastBackend do
   end
 
 end
+

@@ -4,7 +4,7 @@ defmodule LoggerMulticastBackend.Mixfile do
  
   def project, do: [
     app: :logger_multicast_backend,
-    version: "0.0.1",
+    version: "0.2.0",
     elixir: "~> 1.0",
     description: description,
     package: package,

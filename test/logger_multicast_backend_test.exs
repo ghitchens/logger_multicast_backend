@@ -7,6 +7,7 @@ defmodule LoggerMulticastBackendTest do
     Logger.add_backend LoggerMulticastBackend
     Logger.debug "this should write to the multicast socket!  make sure it does"
     Logger.debug "this should write more.  make sure it does"
+    :timer.sleep 5000
   end
   
 end
