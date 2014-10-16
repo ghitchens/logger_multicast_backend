@@ -31,13 +31,12 @@ Don't like the default multicast target or format? change it by replacing
 `LoggerMulticastBackend` in the above examples with a tuple including options something like this:
 
 ```elixir
-config :logger,
-        backends: [ 
-            :console, 
-            {LoggerMulticastBackend, 
-                target: {{224,1,22,223}, 4252}},
-                level: :info
-        ]
+config :logger, backends: [ 
+                    :console, 
+                    {LoggerMulticastBackend, 
+                        target: {{224,1,22,223}, 4252},
+                        level:  :info}
+                ]
 ```
 
 The full range of custom configuration options in the tuple are as follows:
