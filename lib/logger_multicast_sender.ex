@@ -48,10 +48,6 @@ defmodule LoggerMulticastSender do
     end
   end
 
-  # def handle_info(:output, state) do
-  #   {:noreply, state}
-  # end
-
   def handle_info(:timeout, state) do
     {:noreply, state}
   end

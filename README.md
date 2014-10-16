@@ -1,9 +1,9 @@
 LoggerMulticastBackend
 ======================
 
-A `Logger` backend that uses multicast UDP to deliver log messages. Originally
-designed for embedded applications, it allows easily watching the log of a
-headless device on the local network.
+An Elixir `Logger` backend that uses multicast UDP to deliver log messages.
+Designed for headless embedded applications, it allows watching the
+log over the local network.
 
 ## Easy Defaults
 
@@ -11,9 +11,9 @@ In your logger config, simply do something like this:
 
 ```elixir
 config :logger,
-backends: [ :console, LoggerMulticastBackend ],
-level: :debug,
-format: "$time $metadata[$level] $message\n"
+        backends: [ :console, LoggerMulticastBackend ],
+        level: :debug,
+        format: "$time $metadata[$level] $message\n"
 ```
   
 or, at runtime, you can add this to your current config...
@@ -25,13 +25,22 @@ Logger.add_backend LoggerMulticastBackend
 Now, you'll have logging messages sent out on the default target multicast
 address, which is 224,0,0,224:9999.   
 
-## Custom Configuration
+## Custom Target Configuration
 
-Don't like the default multicast target? change it by replacing
-`LoggerMulticastBackend` in the above examples with something like this:
-`{LoggerMulticastBackend, target: {{224,1,22,223}, 4252}}`
+Don't like the default multicast target or format? change it by replacing
+`LoggerMulticastBackend` in the above examples with a tuple including options something like this:
 
-The full range of custom configuration options are as follows:
+```elixir
+config :logger,
+        backends: [ 
+            :console, 
+            {LoggerMulticastBackend, 
+                target: {{224,1,22,223}, 4252}},
+                level: :info
+        ]
+```
+
+The full range of custom configuration options in the tuple are as follows:
 
 :target - a tuple of the target unicast or multicast address and port, like {{241,0,0,3}, 2}
 

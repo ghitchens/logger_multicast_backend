@@ -1,5 +1,9 @@
 defmodule LoggerMulticastBackendTest do
 
+  @moduledoc """
+  Extremely braindead test for now.
+  """
+  
   use ExUnit.Case
   require Logger
 
@@ -7,7 +11,7 @@ defmodule LoggerMulticastBackendTest do
     Logger.add_backend LoggerMulticastBackend
     Logger.debug "this should write to the multicast socket!  make sure it does"
     Logger.debug "this should write more.  make sure it does"
-    :timer.sleep 5000
+    :timer.sleep 1000
   end
   
 end
