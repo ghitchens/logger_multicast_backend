@@ -1,13 +1,13 @@
 defmodule LoggerMulticastSender do
-  
+
   @moduledoc """
-  Implements the sending-server for the LoggerMulticastBackend.  This uses 
+  Implements the sending-server for the LoggerMulticastBackend.  This uses
   genserver to provide a managed timer-based sender for multicast logs
   """
 
   use GenServer
   require Logger
-  
+
   @socket_retry_time  1000      # milliseconds between port open attempts
   @packet_pacer_time  10        # milliseconds between multicasts
   @queue_size         1024      # maximum lines to save in the queue
@@ -22,16 +22,20 @@ defmodule LoggerMulticastSender do
 
   def handle_cast({:add_entry, entry}, state) do
     queue = state.queue ++ [entry]
-    if (length(queue) > @queue_size), do: [_ | queue] = queue
-    {:noreply, %{ state | queue: queue}, @packet_pacer_time}
+    if (length(queue) > @queue_size) do
+      [_ | queue_tail] = queue
+      {:noreply, %{ state | queue: queue_tail}, @packet_pacer_time}
+    else
+      {:noreply, %{ state | queue: queue}, @packet_pacer_time}
+    end
   end
 
   @doc "handle a timer with no current socket - attempt to open it"
   def handle_info(:timeout, %{socket: nil} = state) do
     case :gen_udp.open(0, @socket_opts) do
-      {:ok, socket} -> 
+      {:ok, socket} ->
         {:noreply, %{ state | socket: socket }, @packet_pacer_time}
-      _ -> 
+      _ ->
         {:noreply, state, @socket_retry_time}
     end
   end

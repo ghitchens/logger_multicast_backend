@@ -4,43 +4,43 @@ defmodule LoggerMulticastBackend do
   A `Logger` backend that uses multicast UDP to deliver log messages. Originally
   designed for embedded applications, it allows easily watching the log of a
   headless device on the local network.
-  
+
   # easy peazy
-  
+
   in your logger config, simply do something like this:
-  
+
   ```elixir
   config :logger,
     backends: [ :console, LoggerMulticastBackend ]
     level: :debug,
     format: "$time $metadata[$level] $message\n"
   ```
-      
+
   or, at runtime:
-  
+
   ```elixir
   Logger.add_backend LoggerMulticastBackend
-  ```  
-  
+  ```
+
   LoggerMulticastBackend is configured when specified, and suppors the following options:
-  
+
   :target - a tuple of the target unicast or multicast address and port, like {{241,0,0,3}, 2}
   :level - the level to be logged by this backend. Note that messages are first filtered by the general :level configuration in :logger
   :format - the format message used to print logs. Defaults to: "$time $metadata[$level] $levelpad$message\n"
   :metadata - the metadata to be printed by $metadata. Defaults to an empty list (no metadata)
   """
-  
+
   use GenEvent
   require Logger
 
   @type level     :: Logger.level
   @type format    :: String.t
-  @type metadata  :: [atom]  
+  @type metadata  :: [atom]
 
   @default_target {{224,0,0,224}, 9999}
   @default_format "$time $metadata[$level] $message\n"
   @default_level  :debug
-  
+
   @doc """
   initialize the state of this logger to the environment specified
   in the logger configuration for this backend
@@ -70,8 +70,7 @@ defmodule LoggerMulticastBackend do
   end
 
   defp format_event(level, msg, ts, md, %{format: format, metadata: metadata}) do
-    Logger.Formatter.format(format, level, msg, ts, Dict.take(md, metadata))
+    Logger.Formatter.format(format, level, msg, ts, Keyword.take(md, metadata))
   end
 
 end
-

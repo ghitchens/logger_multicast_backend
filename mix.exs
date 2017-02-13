@@ -4,11 +4,11 @@ defmodule LoggerMulticastBackend.Mixfile do
 
   def project, do: [
     app: :logger_multicast_backend,
-    version: version,
+    version: version(),
     elixir: "~> 1.0",
-    description: description,
-    package: package,
-    deps: deps
+    description: description(),
+    package: package(),
+    deps: deps()
   ]
 
   defp description, do: "Logger backend using Multicast UDP"
