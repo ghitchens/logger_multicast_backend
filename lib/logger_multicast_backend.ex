@@ -1,50 +1,68 @@
 defmodule LoggerMulticastBackend do
 
   @moduledoc """
-  A `Logger` backend that uses multicast UDP to deliver log messages. Originally
-  designed for embedded applications, it allows easily watching the log of a
-  headless device on the local network.
+  A backend for `Logger` that delivers messages over multicast UDP.
 
-  # easy peazy
+  Designed for headless embedded applications, it allows watching the log over the local network.
 
-  in your logger config, simply do something like this:
+  ## Easy Defaults
+
+  In your logger config, simply do something like this:
 
   ```elixir
   config :logger,
-    backends: [ :console, LoggerMulticastBackend ]
-    level: :debug,
-    format: "$time $metadata[$level] $message\n"
+          backends: [ :console, LoggerMulticastBackend ],
+          level: :debug,
+          format: "$time $metadata[$level] $message\\n"
   ```
 
-  or, at runtime:
+  or, at runtime, you can add this to your current config...
 
   ```elixir
   Logger.add_backend LoggerMulticastBackend
   ```
 
-  LoggerMulticastBackend is configured when specified, and suppors the following options:
+  Now, you'll have logging messages sent out on the default target multicast address, which is 224.0.0.224:9999.
 
-  :target - a tuple of the target unicast or multicast address and port, like {{241,0,0,3}, 2}
-  :level - the level to be logged by this backend. Note that messages are first filtered by the general :level configuration in :logger
-  :format - the format message used to print logs. Defaults to: "$time $metadata[$level] $levelpad$message\n"
-  :metadata - the metadata to be printed by $metadata. Defaults to an empty list (no metadata)
+  ## Custom Configuration
+
+  Don't like the default multicast target or format? change it by replacing `LoggerMulticastBackend` in the above examples with a tuple including options something like this:
+
+  ```elixir
+  config :logger, backends: [
+    :console,
+    {LoggerMulticastBackend,
+      target: {{224,1,22,223}, 4252},
+      level:  :info}
+  ]
+  ```
+
+  The full range of custom configuration options in the tuple are as follows:
+
+  - __target__ - a tuple of the target unicast or multicast address and port, like {{241,0,0,3}, 52209}
+
+  - __level__ - the level to be logged by this backend. Note that messages are first filtered by the general level configuration in :logger
+
+  - __format__ - the format message used to print logs.
+  Defaults to: ``"$time $metadata[$level] $levelpad$message\n"``
+
+  - __metadata__ - the metadata to be printed by $metadata.
+  Defaults to an empty list (no metadata)
+
   """
 
   use GenEvent
   require Logger
 
-  @type level     :: Logger.level
-  @type format    :: String.t
-  @type metadata  :: [atom]
+  # @type level     :: Logger.level
+  # @type format    :: String.t
+  # @type metadata  :: [atom]
 
   @default_target {{224,0,0,224}, 9999}
   @default_format "$time $metadata[$level] $message\n"
   @default_level  :debug
 
-  @doc """
-  initialize the state of this logger to the environment specified
-  in the logger configuration for this backend
-  """
+  @doc false
   def init({__MODULE__, opts}) do
     target = Keyword.get(opts, :target, @default_target)
     Logger.debug "starting multicast backend on target #{inspect target}"
@@ -60,7 +78,7 @@ defmodule LoggerMulticastBackend do
 
   def init(__MODULE__), do: init({__MODULE__, []})
 
-  @doc "Add the formatted log entry to the log output queue if it meets our logging criteria"
+  @doc false
   def handle_event({level, _gl, {Logger, message, timestamp, metadata}}, %{level: min_level} = state) do
     if is_nil(min_level) or Logger.compare_levels(level, min_level) != :lt do
       entry = format_event(level, message, timestamp, metadata, state)

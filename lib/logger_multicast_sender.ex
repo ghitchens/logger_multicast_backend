@@ -1,9 +1,6 @@
 defmodule LoggerMulticastSender do
 
-  @moduledoc """
-  Implements the sending-server for the LoggerMulticastBackend.  This uses
-  genserver to provide a managed timer-based sender for multicast logs
-  """
+  @moduledoc false
 
   use GenServer
   require Logger
@@ -30,7 +27,7 @@ defmodule LoggerMulticastSender do
     end
   end
 
-  @doc "handle a timer with no current socket - attempt to open it"
+  # "handle a timer with no current socket - attempt to open it"
   def handle_info(:timeout, %{socket: nil} = state) do
     case :gen_udp.open(0, @socket_opts) do
       {:ok, socket} ->
@@ -40,7 +37,7 @@ defmodule LoggerMulticastSender do
     end
   end
 
-  @doc "handle a timer with a valid socket - attempt to write to it"
+  # "handle a timer with a valid socket - attempt to write to it"
   def handle_info(:timeout, %{queue: queue, socket: socket, target: {addr, port}} = state) when (length(queue) > 0) do
     [first | rest] = queue
     case :gen_udp.send(socket, addr, port, first) do
