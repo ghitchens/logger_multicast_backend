@@ -1,4 +1,9 @@
-## v0.2.0-dev
+## v0.2.1
+
+- cleaned up build for elixir 1.4
+- hex package improvements
+
+## v0.2.0
 
 Major re-architecture
 
@@ -9,6 +14,6 @@ Major re-architecture
 - Tolerates IP address changes properly
 - Removed blocking send (speeds up logger overall)
 
-## v0.0.1
+## v0.1.0
 
-Initial checkin, lots of bugs
+- Initial module, lots of bugs
