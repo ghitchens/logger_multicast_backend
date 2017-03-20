@@ -20,9 +20,21 @@ or, at runtime, you can add this to your current config...
 
 ```elixir
 Logger.add_backend LoggerMulticastBackend
-```  
+```
 
-Now, you'll have logging messages sent out on the default target multicast address, which is 224.0.0.224:9999.   
+Now, you'll have logging messages sent out on the default target multicast address, which is 224.0.0.224:9999.
+
+To capture log messages on systems with [socat](http://www.dest-unreach.org/socat/), run:
+
+```
+$ socat - udp-recv:9999,ip-add-membership=224.0.0.224:eth0
+```
+
+or use [cell](https://github.com/nerves-project/cell-tool):
+
+```
+$ cell watch
+```
 
 ## Custom Configuration
 
