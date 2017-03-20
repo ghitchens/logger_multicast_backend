@@ -1,9 +1,20 @@
-LoggerMulticastBackend
-======================
+# LoggerMulticastBackend
+
+[![Hex version](https://img.shields.io/hexpm/v/logger_multicast_backend.svg "Hex version")](https://hex.pm/packages/logger_multicast_backend)
 
 A backend for `Logger` that delivers messages over multicast UDP.
 
 Designed for headless embedded applications, it allows watching the log over the local network.
+
+## Usage
+
+The package can be installed by adding `logger_multicast_backend` to your list of dependencies in `mix.exs`:
+
+```elixir
+def deps do
+  [{:logger_multicast_backend, "~> 0.2"}]
+end
+```
 
 ## Easy Defaults
 
@@ -20,9 +31,21 @@ or, at runtime, you can add this to your current config...
 
 ```elixir
 Logger.add_backend LoggerMulticastBackend
-```  
+```
 
-Now, you'll have logging messages sent out on the default target multicast address, which is 224.0.0.224:9999.   
+Now, you'll have logging messages sent out on the default target multicast address, which is 224.0.0.224:9999.
+
+To capture log messages on systems with [socat](http://www.dest-unreach.org/socat/), run:
+
+```
+$ socat - udp-recv:9999,ip-add-membership=224.0.0.224:eth0
+```
+
+or use [cell](https://github.com/nerves-project/cell-tool):
+
+```
+$ cell watch
+```
 
 ## Custom Configuration
 
