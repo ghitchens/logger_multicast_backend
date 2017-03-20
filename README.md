@@ -1,9 +1,20 @@
-LoggerMulticastBackend
-======================
+# LoggerMulticastBackend
+
+[![Hex version](https://img.shields.io/hexpm/v/logger_multicast_backend.svg "Hex version")](https://hex.pm/packages/logger_multicast_backend)
 
 A backend for `Logger` that delivers messages over multicast UDP.
 
 Designed for headless embedded applications, it allows watching the log over the local network.
+
+## Usage
+
+The package can be installed by adding `logger_multicast_backend` to your list of dependencies in `mix.exs`:
+
+```elixir
+def deps do
+  [{:logger_multicast_backend, "~> 0.2"}]
+end
+```
 
 ## Easy Defaults
 
