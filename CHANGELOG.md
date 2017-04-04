@@ -1,3 +1,7 @@
+## v0.2.2
+
+- fixed configuration API (thanks @fhunleth) and updated README
+
 ## v0.2.1
 
 - cleaned up build for elixir 1.4

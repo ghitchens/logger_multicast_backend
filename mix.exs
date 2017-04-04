@@ -2,7 +2,7 @@ defmodule LoggerMulticastBackend.Mixfile do
 
   use Mix.Project
 
-  @version "0.2.1"
+  @version "0.2.2"
   @github_url "https://github.com/ghitchens/logger_multicast_backend"
 
   def project do
