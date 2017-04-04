@@ -11,9 +11,7 @@ defmodule LoggerMulticastBackend do
 
   ```elixir
   config :logger,
-          backends: [ :console, LoggerMulticastBackend ],
-          level: :debug,
-          format: "$time $metadata[$level] $message\\n"
+          backends: [ :console, LoggerMulticastBackend ]
   ```
 
   or, at runtime, you can add this to your current config...
@@ -26,15 +24,13 @@ defmodule LoggerMulticastBackend do
 
   ## Custom Configuration
 
-  Don't like the default multicast target or format? change it by replacing `LoggerMulticastBackend` in the above examples with a tuple including options something like this:
+Don't like the default multicast target or format? Change it by including options like this:
 
   ```elixir
-  config :logger, backends: [
-    :console,
-    {LoggerMulticastBackend,
+  config :logger, :logger_multicast_backend,
       target: {{224,1,22,223}, 4252},
-      level:  :info}
-  ]
+      format: "$time $metadata[$level] $message\\n",
+      level:  :info
   ```
 
   The full range of custom configuration options in the tuple are as follows:
@@ -60,19 +56,23 @@ defmodule LoggerMulticastBackend do
 
   @default_target {{224,0,0,224}, 9999}
   @default_format "$time $metadata[$level] $message\n"
-  @default_level  :debug
 
   @doc false
-  def init({__MODULE__, opts}) do
+  def init({__MODULE__, opts}) when is_list(opts) do
+    env = Application.get_env(:logger, :logger_multicast_backend, [])
+    opts = Keyword.merge(env, opts)
+    Application.put_env(:logger, :logger_multicast_backend, opts)
+
+    level  = Keyword.get(opts, :level)
+    metadata = Keyword.get(opts, :metadata, [])
+    format_opts = Keyword.get(opts, :format, @default_format)
+    format = Logger.Formatter.compile(format_opts)
     target = Keyword.get(opts, :target, @default_target)
+
     Logger.debug "starting multicast backend on target #{inspect target}"
     {:ok, sender} = GenServer.start_link(LoggerMulticastSender, target)
-    state = %{
-      sender: sender,
-      level: Keyword.get(opts, :level, @default_level),
-      format: (Keyword.get(opts, :format, @default_format) |> Logger.Formatter.compile),
-      metadata: Keyword.get(opts, :metadata, [])
-    }
+
+    state = %{sender: sender, level: level, format: format, metadata: metadata}
     {:ok, state}
   end
 

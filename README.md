@@ -22,9 +22,7 @@ In your logger config, simply do something like this:
 
 ```elixir
 config :logger,
-        backends: [ :console, LoggerMulticastBackend ],
-        level: :debug,
-        format: "$time $metadata[$level] $message\n"
+        backends: [ :console, LoggerMulticastBackend ]
 ```
 
 or, at runtime, you can add this to your current config...
@@ -49,15 +47,13 @@ $ cell watch
 
 ## Custom Configuration
 
-Don't like the default multicast target or format? change it by replacing `LoggerMulticastBackend` in the above examples with a tuple including options something like this:
+Don't like the default multicast target or format? Change it by including options like this:
 
 ```elixir
-config :logger, backends: [
-  :console,
-  {LoggerMulticastBackend,
+  config :logger, :logger_multicast_backend,
     target: {{224,1,22,223}, 4252},
-    level:  :info}
-]
+    format: "$time $metadata[$level] $message\\n",
+    level:  :info
 ```
 
 The full range of custom configuration options in the tuple are as follows:
