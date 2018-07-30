@@ -87,6 +87,10 @@ Don't like the default multicast target or format? Change it by including option
     {:ok, state}
   end
 
+  defp format_event(level, msg, ts, md, %{format: format, metadata: :all}) do
+    Logger.Formatter.format(format, level, msg, ts, md)
+  end
+
   defp format_event(level, msg, ts, md, %{format: format, metadata: metadata}) do
     Logger.Formatter.format(format, level, msg, ts, Keyword.take(md, metadata))
   end
